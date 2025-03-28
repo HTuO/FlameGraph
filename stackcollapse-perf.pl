@@ -193,32 +193,6 @@ sub inline {
 	return $result;
 }
 
-sub trim {
-	my $str = shift;
-	my $depth_angle = 0;
-    
-	# Find first parentheses that is outside of angle brackets
-	for (my $i = 0; $i < length($str); $i++) {
-		my $char = substr($str, $i, 1);
-        
-		if ($char eq '<') {
-			$depth_angle++;
-		}
-
-		elsif ($char eq '>') {
-			$depth_angle-- if $depth_angle > 0;
-		}
-
-		elsif ($char eq '(' && $depth_angle == 0) {
-			my $parentheses_part = substr($str, $i);
-			$parentheses_part =~ s/\((?!anonymous namespace\)).*//;
-			return substr($str, 0, $i) . $parentheses_part;
-		}
-	}
-    
-    return $str;  # No matching parentheses found
-}
-
 my @stack;
 my $pname;
 my $m_pid;
