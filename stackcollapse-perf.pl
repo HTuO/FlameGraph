@@ -193,32 +193,6 @@ sub inline {
 	return $result;
 }
 
-sub trim {
-	my $str = shift;
-	my $depth_angle = 0;
-    
-	# Find first parentheses that is outside of angle brackets
-	for (my $i = 0; $i < length($str); $i++) {
-		my $char = substr($str, $i, 1);
-        
-		if ($char eq '<') {
-			$depth_angle++;
-		}
-
-		elsif ($char eq '>') {
-			$depth_angle-- if $depth_angle > 0;
-		}
-
-		elsif ($char eq '(' && $depth_angle == 0) {
-			my $parentheses_part = substr($str, $i);
-			$parentheses_part =~ s/\((?!anonymous namespace\)).*//;
-			return substr($str, 0, $i) . $parentheses_part;
-		}
-	}
-    
-    return $str;  # No matching parentheses found
-}
-
 my @stack;
 my $pname;
 my $m_pid;
@@ -342,7 +316,7 @@ while (defined($_ = <>)) {
 		# Linux 4.8 included symbol offsets in perf script output by default, eg:
 		# 7fffb84c9afc cpu_startup_entry+0x800047c022ec ([kernel.kallsyms])
 		# strip these off:
-		$rawfunc =~ s/\+0x[\da-f]+$//;
+		$rawfunc =~ s/(?: \[[^\[\]]+\])?\+0x[\da-f]+.*$//;
 
 		next if $rawfunc =~ /^\(/;		# skip process names
 
@@ -369,14 +343,7 @@ while (defined($_ = <>)) {
 
 			if ($tidy_generic) {
 				$func =~ s/;/:/g;
-				if ($func !~ m/\.\(.*\)\./) {
-					# This doesn't look like a Go method name (such as
-					# "net/http.(*Client).Do"), so everything after the first open
-					# paren (that is not part of an "(anonymous namespace)") is
-					# just noise.
 
-					$func =~ trim($func);
-				}
 				# now tidy this horrible thing:
 				# 13a80b608e0a RegExp:[&<>\"\'] (/tmp/perf-7539.map)
 				$func =~ tr/"\'//d;
