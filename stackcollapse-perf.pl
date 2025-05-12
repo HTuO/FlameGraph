@@ -267,7 +267,7 @@ while (defined($_ = <>)) {
 				# instructions and cycles, produces misleading results.
 				$event_filter = $event;
 				$event_defaulted = 1;
-			} elsif ($event ne $event_filter) {
+			} elsif ($event ne $event_filter && $event !~ /$event_filter:\S/) {
 				if ($event_defaulted and $event_warning == 0) {
 					# only print this warning if necessary:
 					# when we defaulted and there was
